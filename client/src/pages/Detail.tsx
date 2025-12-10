@@ -1,8 +1,31 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Star, Share, Heart, Check, Calendar } from 'lucide-react';
+import { 
+  ChevronLeft, Star, MapPin, 
+  Wifi, Wind, Minus, Plus, Calendar, 
+  CheckCircle2, X, Grid 
+} from 'lucide-react';
 import { Hotel, BookingDetails } from '../types';
 import { Button } from '../components/Button';
-import { DoorOpen, Medal } from '../components/Icons';
+
+// --- Mock Reviews ---
+const MOCK_REVIEWS = [
+  {
+    id: 1,
+    user: "Sarah Jenkins",
+    date: "Oct 2024",
+    rating: 5,
+    avatar: "https://i.pravatar.cc/150?u=1",
+    comment: "The view of the Bosphorus is breathtaking. Totally worth it."
+  },
+  {
+    id: 2,
+    user: "Mehmet Y.",
+    date: "Nov 2024",
+    rating: 4,
+    avatar: "https://i.pravatar.cc/150?u=2",
+    comment: "Great location in Beşiktaş, very close to the ferry."
+  }
+];
 
 interface DetailPageProps {
   hotel: Hotel;
@@ -16,7 +39,6 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel, onBack, onBook })
   const [guestCount, setGuestCount] = useState(1);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
 
-  // Helper to calculate days
   const getDaysDifference = (d1: string, d2: string) => {
     if (!d1 || !d2) return 0;
     const diff = Math.abs(new Date(d2).getTime() - new Date(d1).getTime());
@@ -24,22 +46,26 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel, onBack, onBook })
   };
 
   const nights = getDaysDifference(checkIn, checkOut);
-  const subtotal = hotel.price * nights;
-  const cleaningFee = 500;
-  const serviceFee = 850;
-  const total = subtotal + cleaningFee + serviceFee;
+  const total = hotel.price * nights;
 
   if (showAllPhotos) {
     return (
-      <div className="fixed inset-0 bg-white z-[100] overflow-y-auto animate-in slide-in-from-bottom-10 duration-300">
-        <div className="sticky top-0 bg-white p-4 flex items-center justify-between border-b border-gray-100">
-          <button onClick={() => setShowAllPhotos(false)} className="p-2 hover:bg-gray-100 rounded-full">
+      <div className="fixed inset-0 bg-white z-50 overflow-y-auto animate-in fade-in duration-200">
+        <div className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex justify-between items-center z-20">
+          <button 
+            onClick={() => setShowAllPhotos(false)} 
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
             <ChevronLeft size={24}/>
           </button>
+          <span className="font-bold text-lg">Photo Gallery</span>
+          <div className="w-10"></div>
         </div>
-        <div className="max-w-5xl mx-auto p-4 md:p-8 columns-1 md:columns-2 gap-4 space-y-4">
+        <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
           {hotel.images.map((img, idx) => (
-             <img key={idx} src={img} className="w-full rounded-xl mb-4 break-inside-avoid" alt={`Gallery ${idx}`}/>
+             <div key={idx} className="rounded-2xl overflow-hidden shadow-sm">
+                <img src={img} className="w-full h-auto object-cover" alt={`Gallery ${idx}`}/>
+             </div>
           ))}
         </div>
       </div>
@@ -47,68 +73,206 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel, onBack, onBook })
   }
 
   return (
-    <div className="animate-in fade-in duration-500 max-w-7xl mx-auto px-4 md:px-8 py-6 pb-20">
-      <div className="mb-6">
-        <button onClick={onBack} className="flex items-center text-gray-500 hover:text-black mb-4 font-medium">
-          <ChevronLeft size={20} /> Back to search
+    <div className="bg-white min-h-screen pb-20 font-sans text-gray-900">
+      
+      {/* Top Navigation */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+        <button 
+          onClick={onBack} 
+          className="group flex items-center gap-2 text-gray-500 hover:text-black transition-colors font-medium"
+        >
+          <div className="p-2 bg-gray-100 group-hover:bg-gray-200 rounded-full transition-colors">
+            <ChevronLeft size={20} />
+          </div>
+          <span>Back to listings</span>
         </button>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{hotel.title}</h1>
-        {/* ... (Rating/Location Header from previous code) ... */}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 h-[300px] md:h-[480px] rounded-2xl overflow-hidden mb-8 md:mb-12">
-        <div className="md:col-span-2 row-span-2 relative group cursor-pointer" onClick={() => setShowAllPhotos(true)}>
-          <img src={hotel.images[0]} alt="Main" className="w-full h-full object-cover hover:opacity-95 transition-opacity" />
-        </div>
-        {hotel.images.slice(1, 5).map((img, i) => (
-           <div key={i} className="hidden md:block relative group cursor-pointer" onClick={() => setShowAllPhotos(true)}>
-             <img src={img} alt={`Grid ${i}`} className="w-full h-full object-cover hover:opacity-95 transition-opacity" />
-           </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-        <div className="md:col-span-2">
-          <div className="border-b border-gray-200 pb-6 mb-6">
-            <h2 className="text-xl font-semibold mb-1">{hotel.type} hosted by {hotel.superhost ? 'Superhost' : 'Host'}</h2>
-            <p className="text-gray-500">{hotel.guests} guests · {hotel.bedrooms} bedrooms · {hotel.beds} beds · {hotel.baths} baths</p>
-          </div>
-          <div className="border-b border-gray-200 pb-6 mb-6">
-             <div className="flex gap-4 mb-6">
-               <div className="mt-1"><DoorOpen size={24} className="text-gray-700" /></div>
-               <div><h3 className="font-medium">Self check-in</h3><p className="text-gray-500 text-sm">Check yourself in with the keypad.</p></div>
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        
+        {/* Gallery */}
+        <div className="mb-10 group cursor-pointer" onClick={() => setShowAllPhotos(true)}>
+          <div className="w-full h-[400px] md:h-[500px] rounded-[2rem] overflow-hidden shadow-sm relative mb-4">
+             <img 
+               src={hotel.images[0]} 
+               alt="Main" 
+               className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+             />
+             <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
+                <Grid size={16} /> View all photos
              </div>
-             {/* ... more amenities ... */}
           </div>
-          <div className="border-b border-gray-200 pb-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">About this place</h2>
-            <p className="text-gray-700 leading-relaxed">{hotel.description}</p>
+          
+          <div className="grid grid-cols-4 gap-4 h-24 md:h-32">
+             {[...hotel.images, ...hotel.images].slice(0, 4).map((img, i) => (
+               <div key={i} className="rounded-xl overflow-hidden relative">
+                 <img src={img} alt="Thumbnail" className="w-full h-full object-cover hover:opacity-80 transition-opacity" />
+                 {i === 3 && (
+                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold text-lg">
+                     +{hotel.images.length}
+                   </div>
+                 )}
+               </div>
+             ))}
           </div>
         </div>
 
-        <div className="md:col-span-1 relative">
-          <div className="sticky top-28 border border-gray-200 shadow-xl rounded-2xl p-6 bg-white">
-            <div className="flex justify-between items-end mb-5">
-              <div><span className="text-2xl font-semibold">₺{hotel.price}</span><span className="text-gray-500"> night</span></div>
-            </div>
-            <div className="border border-gray-300 rounded-xl mb-4 overflow-hidden">
-              <div className="grid grid-cols-2 border-b border-gray-300">
-                <div className="p-3 border-r border-gray-300 bg-white">
-                  <label className="block text-[10px] font-bold uppercase text-gray-700">Check-in</label>
-                  <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="w-full text-sm outline-none bg-transparent p-0"/>
-                </div>
-                <div className="p-3 bg-white">
-                  <label className="block text-[10px] font-bold uppercase text-gray-700">Checkout</label>
-                   <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="w-full text-sm outline-none bg-transparent p-0"/>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-7 space-y-10">
+            
+            {/* Header Info */}
+            <div>
+              <div className="flex items-center gap-2 text-orange-600 font-bold mb-3 uppercase tracking-wider text-xs">
+                <MapPin size={16} />
+                <span>{hotel.location}</span>
               </div>
-              <div className="p-3 bg-white">
-                <label className="block text-[10px] font-bold uppercase text-gray-700">Guests</label>
-                <input type="number" min="1" max={hotel.guests} value={guestCount} onChange={(e) => setGuestCount(Number(e.target.value))} className="w-full text-sm outline-none bg-transparent p-0"/>
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+                {hotel.title}
+              </h1>
+              <div className="flex items-center gap-6 text-gray-500">
+                 <span className="flex items-center gap-1">
+                   <Star size={18} className="text-black fill-black"/> 
+                   <span className="font-semibold text-black">{hotel.rating}</span> 
+                   <span className="text-gray-400">({hotel.reviews} reviews)</span>
+                 </span>
+                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                 <span>{hotel.type}</span>
               </div>
             </div>
-            <Button variant="primary" className="w-full py-3.5 text-lg mb-4" onClick={() => onBook({checkIn, checkOut, guestCount, total})}>Reserve</Button>
-            {/* Price breakdown text... */}
+
+            <hr className="border-gray-100" />
+
+            {/* Host */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold">Hosted by {hotel.superhost ? 'Emir' : 'Host'}</h3>
+                <p className="text-gray-500 text-sm">Response rate: 100%</p>
+              </div>
+              <div className="h-12 w-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-lg border border-orange-200">
+                H
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            {/* Description */}
+            <div>
+              <h3 className="text-xl font-bold mb-4">About the space</h3>
+              <p className="text-gray-600 leading-8 text-lg font-light">
+                {hotel.description}
+              </p>
+            </div>
+
+            {/* Amenities */}
+            <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
+              <h3 className="text-lg font-bold mb-6">Amenities</h3>
+              <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                {hotel.amenities.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle2 size={18} className="text-orange-600" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Reviews */}
+            <div>
+               <h3 className="text-xl font-bold mb-6">Recent Reviews</h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 {MOCK_REVIEWS.map(r => (
+                   <div key={r.id} className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm">
+                     <div className="flex items-center gap-3 mb-3">
+                       <img src={r.avatar} alt={r.user} className="w-8 h-8 rounded-full" />
+                       <div>
+                         <p className="font-bold text-sm">{r.user}</p>
+                         <p className="text-xs text-gray-400">{r.date}</p>
+                       </div>
+                     </div>
+                     <p className="text-gray-600 text-sm leading-relaxed">"{r.comment}"</p>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </div>
+
+          {/* Booking */}
+          <div className="lg:col-span-5 relative">
+            <div className="sticky top-10">
+              
+              <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100">
+                <div className="flex justify-between items-end mb-6">
+                   <div>
+                     <span className="text-3xl font-bold text-gray-900">₺{hotel.price}</span>
+                     <span className="text-gray-500"> / night</span>
+                   </div>
+                   <div className="flex items-center gap-1 text-sm font-semibold">
+                     <Star size={16} className="fill-orange-500 text-orange-500"/> {hotel.rating}
+                   </div>
+                </div>
+
+                {/* Date Selection */}
+                <div className="space-y-4 mb-8">
+                   <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-2xl border border-gray-200 hover:border-orange-500 focus-within:ring-1 focus-within:ring-orange-500 transition-all cursor-pointer">
+                        <label className="text-xs text-gray-500 font-bold uppercase block mb-1">Check-in</label>
+                        <input 
+                          type="date" 
+                          value={checkIn} 
+                          onChange={e => setCheckIn(e.target.value)} 
+                          className="w-full bg-transparent outline-none text-sm font-semibold text-gray-900 cursor-pointer"
+                        />
+                      </div>
+                      <div className="p-3 rounded-2xl border border-gray-200 hover:border-orange-500 focus-within:ring-1 focus-within:ring-orange-500 transition-all cursor-pointer">
+                        <label className="text-xs text-gray-500 font-bold uppercase block mb-1">Check-out</label>
+                        <input 
+                          type="date" 
+                          value={checkOut} 
+                          onChange={e => setCheckOut(e.target.value)} 
+                          className="w-full bg-transparent outline-none text-sm font-semibold text-gray-900 cursor-pointer"
+                        />
+                      </div>
+                   </div>
+
+                   {/* Guests */}
+                   <div className="p-4 rounded-2xl border border-gray-200 flex items-center justify-between">
+                      <div>
+                        <label className="text-xs text-gray-500 font-bold uppercase block mb-1">Guests</label>
+                        <span className="text-sm font-semibold text-gray-900">{guestCount} Guest{guestCount > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => setGuestCount(Math.max(1, guestCount - 1))} 
+                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <button 
+                          onClick={() => setGuestCount(Math.min(hotel.guests, guestCount + 1))} 
+                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Total Calculation */}
+                <div className="border-t border-gray-100 pt-6 mb-8">
+                   <div className="flex justify-between items-center text-lg">
+                      <span className="text-gray-600 font-medium">Total ({nights} nights)</span>
+                      <span className="font-bold text-2xl text-gray-900">₺{total.toLocaleString()}</span>
+                   </div>
+                </div>
+
+                <Button 
+                  className="w-full py-4 text-lg font-bold bg-orange-600 hover:bg-orange-700 text-white rounded-xl shadow-lg shadow-orange-200 transition-all active:scale-[0.98]"
+                  onClick={() => onBook({ checkIn, checkOut, guestCount, total })}
+                >
+                  Confirm Booking
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

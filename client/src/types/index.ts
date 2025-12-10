@@ -7,4 +7,28 @@ export interface User {
     email: string;
     avatar: string;
   }
-  
+
+  export interface Hotel {
+  id: number;
+  title: string;
+  location: string;
+  type: string;
+  guests: number;
+  bedrooms: number;
+  beds: number;
+  baths: number;
+  price: number;
+  rating: number;
+  reviews: number;
+  superhost: boolean;
+  images: string[];
+  amenities: string[];
+  description: string;
+}
+
+export interface BookingDetails {
+  checkIn: string;
+  checkOut: string;
+  guestCount: number;
+  total: number;
+}
