@@ -13,6 +13,10 @@ import { AuthModal } from './features/auth/AuthModal';
 import { User, Hotel, BookingDetails } from './types';
 import { MOCK_USER } from './data/mockData';
 
+interface SearchPayload {
+  dateRange?: { start: string; end: string };
+}
+
 const App = () => {
   const [page, setPage] = useState<string>('home');
   const [user, setUser] = useState<User | null>(null);
@@ -20,6 +24,9 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({ checkIn: '', checkOut: '', guestCount: 1, total: 0 });
+
+  // Detect AI mode based on length criteria
+  const isAiMode = searchTerm.length > 12;
 
   const handleNavigate = (target: string) => {
     window.scrollTo(0, 0);
@@ -36,8 +43,35 @@ const App = () => {
     handleNavigate('home');
   };
 
-  const handleSearchSubmit = () => {
+  /**
+   * BACKEND TEAM:
+   * This is where the Traditional Search Logic goes.
+   * e.g., Filter by exact string match, location, and date availability.
+   */
+  const performTraditionalSearch = (term: string, dates?: { start: string, end: string }) => {
+    console.log("Creating Traditional Query:", { term, dates });
+    // TODO: Call API endpoint: GET /api/v1/search?q={term}&start={dates.start}...
     handleNavigate('search');
+  };
+
+  /**
+   * BACKEND TEAM:
+   * This is where the AI Search Logic goes.
+   * Since we are in AI mode, we ignore specific dates in the UI (or infer them from the prompt).
+   */
+  const performAiSearch = (prompt: string) => {
+    console.log("Creating AI/LLM Query:", { prompt });
+    // TODO: Call API endpoint: POST /api/v1/ai-search { prompt: prompt }
+    // The visual response might be different, but for now we go to search page
+    handleNavigate('search');
+  };
+
+  const handleSearchSubmit = (data?: SearchPayload) => {
+    if (isAiMode) {
+      performAiSearch(searchTerm);
+    } else {
+      performTraditionalSearch(searchTerm, data?.dateRange);
+    }
   };
 
   const handleHotelClick = (hotel: Hotel) => {
@@ -65,11 +99,9 @@ const App = () => {
           currentPage={page}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          onSearchSubmit={handleSearchSubmit}
+          onSearchSubmit={handleSearchSubmit} 
         />
       )}
-
-      {/* --- ROUTES --- */}
 
       {page === 'home' && <HomePage onHotelClick={handleHotelClick} />}
       

@@ -1,4 +1,3 @@
-// src/layout/Navbar.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Home, Globe, Menu, User as UserIcon, Check, 
@@ -6,6 +5,10 @@ import {
 } from 'lucide-react';
 import { User } from '../types';
 import { NavSearchBar } from '../components/NavSearchBar';
+
+interface SearchData {
+  dateRange?: { start: string; end: string };
+}
 
 interface NavbarProps {
   user: User | null;
@@ -15,7 +18,7 @@ interface NavbarProps {
   currentPage: string;
   searchTerm?: string;
   onSearchChange?: (value: string) => void;
-  onSearchSubmit?: () => void;
+  onSearchSubmit?: (data?: SearchData) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
@@ -50,8 +53,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     if (onSearchChange) onSearchChange(value);
   };
 
-  const handleSearchSubmit = () => {
-    if (onSearchSubmit) onSearchSubmit();
+  const handleSearchSubmit = (data?: SearchData) => {
+    if (onSearchSubmit) onSearchSubmit(data);
   };
 
   const handleUserIconClick = () => {
