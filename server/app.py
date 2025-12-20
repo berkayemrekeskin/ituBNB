@@ -14,6 +14,7 @@ from routes.auth import auth_bp
 from routes.user import user_bp
 from routes.listings import listings_bp
 from routes.messages import messages_bp
+from routes.review import review_bp
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), ".ini")
 config = configparser.ConfigParser()
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(listings_bp)
     app.register_blueprint(messages_bp)
+    app.register_blueprint(review_bp)
     
     app.json_encoder = MongoJsonEncoder
 
