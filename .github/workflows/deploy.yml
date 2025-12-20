@@ -28,6 +28,7 @@ jobs:
         run: npm run build
         env:
            CI: false
+           BACKEND_API_URL: http://${{ secrets.SERVER_IP }}:5005
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v2.0

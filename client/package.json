@@ -1,11 +1,11 @@
 {
   "name": "itubnb",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node generate-redirects.js && vite build",
+    "build": "node generateRedirects.js && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
