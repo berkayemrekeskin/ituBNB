@@ -7,6 +7,7 @@ interface DatePickerPanelProps {
     startDate: string | null;
     endDate: string | null;
     onChange: (start: string | null, end: string | null) => void;
+    className?: string;
 }
 
 export const DatePickerPanel: React.FC<DatePickerPanelProps> = ({
@@ -15,6 +16,7 @@ export const DatePickerPanel: React.FC<DatePickerPanelProps> = ({
     startDate,
     endDate,
     onChange,
+    className,
 }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -57,6 +59,8 @@ export const DatePickerPanel: React.FC<DatePickerPanelProps> = ({
             // Check if clicked date is before start date
             if (new Date(dateStr) < new Date(startDate)) {
                 onChange(dateStr, null);
+            } else if (dateStr === startDate) {
+                return;
             } else {
                 onChange(startDate, dateStr);
                 // Optional: Close on selection complete?
@@ -162,7 +166,7 @@ export const DatePickerPanel: React.FC<DatePickerPanelProps> = ({
 
     return (
         <div
-            className="absolute top-16 left-0 right-0 mx-auto w-full max-w-[850px] bg-white rounded-3xl shadow-xl border border-gray-100 p-8 z-[60] animate-in fade-in slide-in-from-top-4 duration-200"
+            className={`bg-white rounded-3xl shadow-xl border border-gray-100 p-8 z-[60] animate-in fade-in slide-in-from-top-4 duration-200 ${className ?? "absolute top-16 left-0 right-0 mx-auto w-full max-w-[850px]"}`}
             onClick={(e) => e.stopPropagation()}
         >
             {/* Header */}
