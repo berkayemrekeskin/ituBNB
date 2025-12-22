@@ -14,6 +14,7 @@ import { SuccessPage } from './pages/SuccessPage';
 import { AuthModal } from './features/auth/AuthModal';
 import { User, Hotel, BookingDetails } from './types';
 import { authService } from './services/authService';
+import { AdminPage } from './pages/AdminPage';
 
 // Data structure received from the NavSearchBar
 interface SearchBarData {
@@ -44,6 +45,9 @@ const App = () => {
   const handleLogin = (userData: User) => {
     setUser(userData);
     setShowAuth(false);
+    if (userData.role === 'admin') {
+      navigate('/admin');
+    }
   };
 
   const handleLogout = () => {
@@ -98,6 +102,8 @@ const App = () => {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       <Routes>
+        <Route path="/admin" element={<AdminPage onLogout={handleLogout} />} />
+
         <Route element={
           <MainLayout
             user={user}
