@@ -25,18 +25,6 @@ export const HomePage: React.FC<HomeProps> = ({ onHotelClick }) => {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="max-w-7xl mx-auto mt-12 px-8 overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex gap-8 min-w-max">
-          {['Amazing Views', 'Historic', 'Design', 'Mansions'].map((cat, i) => (
-            <div key={i} className={`flex flex-col items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity border-b-2 pb-2 ${i===0 ? 'border-black opacity-100' : 'border-transparent'}`}>
-              <div className="bg-gray-100 p-2 rounded-full"><HomeIcon size={20} className="text-gray-700" /></div>
-              <span className="text-xs font-bold text-gray-600">{cat}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Listing Grid */}
       <div className="max-w-7xl mx-auto mt-8 px-4 md:px-8">
         <h2 className="text-2xl font-bold mb-6">Featured stays</h2>

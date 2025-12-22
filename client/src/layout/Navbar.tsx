@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Home, Globe, Menu, User as UserIcon, Check, 
+  Home, Menu, User as UserIcon, 
   MessageSquare, Map, LogOut 
 } from 'lucide-react';
 import { User } from '../types';
 import { NavSearchBar } from '../components/NavSearchBar';
 
-interface SearchData {
+// This matches the data structure coming from NavSearchBar
+interface SearchBarData {
+  mode: 'standard' | 'ai';
+  destination: string;
   dateRange?: { start: string; end: string };
 }
 
@@ -16,9 +19,7 @@ interface NavbarProps {
   onLogout?: () => void;
   onNavigate: (page: string) => void;
   currentPage: string;
-  searchTerm?: string;
-  onSearchChange?: (value: string) => void;
-  onSearchSubmit?: (data?: SearchData) => void;
+  onSearchSubmit: (data: SearchBarData) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
@@ -26,41 +27,24 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogin, 
   onLogout,
   onNavigate, 
-  currentPage, 
-  searchTerm, 
-  onSearchChange, 
   onSearchSubmit,
 }) => {
-  const [showLangMenu, setShowLangMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [currency, setCurrency] = useState("USD");
-  const [language, setLanguage] = useState("English");
-  
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false);
-        setShowLangMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSearchChange = (value: string) => {
-    if (onSearchChange) onSearchChange(value);
-  };
-
-  const handleSearchSubmit = (data?: SearchData) => {
-    if (onSearchSubmit) onSearchSubmit(data);
-  };
-
   const handleUserIconClick = () => {
     if (user) {
       setShowUserMenu(!showUserMenu);
-      setShowLangMenu(false);
     } else {
       onLogin();
     }
@@ -85,11 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Middle: Search Bar */}
-      <NavSearchBar
-          value={searchTerm ?? ""}
-          onChange={handleSearchChange}
-          onSubmit={handleSearchSubmit}
-      />
+      <NavSearchBar onSubmit={onSearchSubmit} />
 
       {/* Right Actions */}
       <div className="flex items-center gap-4" ref={menuRef}>
@@ -98,48 +78,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           onClick={() => onNavigate('owner-dashboard')}
         >
           Switch to hosting
-        </div>
-        
-        {/* Language/Currency Selector */}
-        <div className="relative">
-          <div 
-            className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
-            onClick={() => {
-              setShowLangMenu(!showLangMenu);
-              setShowUserMenu(false);
-            }}
-          >
-            <Globe size={18} />
-          </div>
-          
-          {showLangMenu && (
-            <div className="absolute top-12 right-0 bg-white rounded-xl shadow-xl border border-gray-100 w-64 p-4 animate-in fade-in zoom-in-95 duration-200 z-50">
-               <div className="mb-4">
-                 <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">Language</h4>
-                 {['English', 'Turkish'].map(lang => (
-                    <div 
-                      key={lang}
-                      className={`p-2 rounded hover:bg-gray-100 cursor-pointer flex justify-between ${language === lang ? 'font-bold bg-gray-50' : ''}`}
-                      onClick={() => setLanguage(lang)}
-                    >
-                      {lang} {language === lang && <Check size={14}/>}
-                    </div>
-                 ))}
-               </div>
-               <div className="border-t pt-2">
-                 <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">Currency</h4>
-                 {['USD', 'EUR', 'TRY'].map(curr => (
-                   <div 
-                    key={curr}
-                    className={`p-2 rounded hover:bg-gray-100 cursor-pointer flex justify-between ${currency === curr ? 'font-bold bg-gray-50' : ''}`}
-                    onClick={() => setCurrency(curr)}
-                   >
-                     {curr} {currency === curr && <Check size={14}/>}
-                   </div>
-                 ))}
-               </div>
-            </div>
-          )}
         </div>
         
         {/* User Menu Trigger */}
