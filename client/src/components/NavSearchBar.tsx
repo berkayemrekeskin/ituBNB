@@ -1,129 +1,174 @@
-import React, { useState } from "react";
-import { Search, Sparkles } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Search, Sparkles, ArrowUp, X } from "lucide-react";
+
+type SearchData = {
+  mode: 'standard' | 'ai';
+  destination: string;
+  dateRange?: { start: string; end: string };
+};
 
 type NavSearchBarProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: (data: { dateRange?: { start: string; end: string } }) => void;
+  initialValue?: string;
+  onSubmit: (data: SearchData) => void;
 };
 
 export const NavSearchBar: React.FC<NavSearchBarProps> = ({
-  value,
-  onChange,
+  initialValue = "",
   onSubmit,
 }) => {
+  const [mode, setMode] = useState<'standard' | 'ai'>('standard');
+  const [destination, setDestination] = useState(initialValue);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  
-  // Logic to determine AI Mode
-  const isAiMode = value.length > 12;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const isAi = mode === 'ai';
+
+  useEffect(() => {
+    if (isAi && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [isAi]);
+
+  const handleSubmit = () => {
+    onSubmit({
+      mode,
+      destination,
+      dateRange: mode === 'standard' ? { start: startDate, end: endDate } : undefined
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSubmit();
     }
   };
 
-  const handleSubmit = () => {
-    onSubmit({
-      dateRange: { start: startDate, end: endDate }
-    });
-  };
-
   return (
-    <div className="hidden md:flex flex-1 justify-center px-4 md:px-12">
-      <div 
-        className={`
-          relative flex w-full max-w-3xl items-center gap-2 rounded-full border bg-white px-2 py-2 shadow-sm transition-all duration-500 ease-in-out
-          ${isAiMode ? 'border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'border-gray-200'}
-        `}
-      >
-        {/* --- Search Input Section --- */}
-        <div className="flex flex-1 items-center pl-3">
-            <div className="relative w-5 h-5 mr-3">
-                <Search 
-                    size={20} 
-                    className={`absolute text-gray-500 transition-all duration-500 ${isAiMode ? 'opacity-0 scale-75 rotate-90' : 'opacity-100 scale-100 rotate-0'}`} 
-                />
-                <Sparkles 
-                    size={20} 
-                    className={`absolute text-indigo-500 transition-all duration-500 ${isAiMode ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 -rotate-90'}`} 
-                />
-            </div>
-
-            <input
-              type="text"
-              placeholder={isAiMode ? "Describe your dream trip..." : "Search destination..."}
-              className="w-full bg-transparent text-sm md:text-base outline-none placeholder:text-gray-400 transition-all"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-        </div>
-
-        {/* --- Divider --- */}
-        <div className={`h-6 w-[1px] bg-gray-300 transition-all duration-300 ${isAiMode ? 'opacity-0' : 'opacity-100'}`}></div>
-
-        {/* --- Dynamic Section --- */}
-        <div className="flex items-center overflow-hidden">
-            
-            {/* Date Inputs */}
-            <div 
-                className={`flex items-center gap-2 transition-all duration-500 ease-in-out whitespace-nowrap overflow-hidden
-                ${isAiMode ? 'max-w-0 opacity-0 translate-x-10' : 'max-w-[300px] opacity-100 translate-x-0 px-2'}`}
-            >
-                <div className="flex flex-col w-24">
-                    <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wider pl-1">Check In</span>
-                    <input 
-                        type="text"
-                        placeholder="dd/mm/yyyy"
-                        onFocus={(e) => (e.target.type = "date")}
-                        onBlur={(e) => {
-                          if (!e.target.value) e.target.type = "text";
-                        }}
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="text-xs text-gray-600 outline-none bg-transparent font-medium cursor-pointer w-full p-1" 
-                    />
-                </div>
-                <div className="flex flex-col w-24">
-                    <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wider pl-1">Check Out</span>
-                    <input 
-                        type="text"
-                        placeholder="dd/mm/yyyy"
-                        onFocus={(e) => (e.target.type = "date")}
-                        onBlur={(e) => {
-                          if (!e.target.value) e.target.type = "text";
-                        }}
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="text-xs text-gray-600 outline-none bg-transparent font-medium cursor-pointer w-full p-1" 
-                    />
-                </div>
-            </div>
-
-            {/* AI MODE: Visual Cue Text */}
-            <div 
-                className={`flex items-center gap-2 transition-all duration-500 ease-in-out whitespace-nowrap overflow-hidden
-                ${isAiMode ? 'max-w-[200px] opacity-100 translate-x-0 px-3' : 'max-w-0 opacity-0 -translate-x-10'}`}
-            >
-                <span className="text-sm font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">
-                    AI Enhanced Search Active
-                </span>
-            </div>
-
-        </div>
-
-        {/* --- Search Button --- */}
-        <button
-          className={`
-            shrink-0 rounded-full px-6 py-3 text-sm font-medium text-white transition-all duration-300
-            ${isAiMode ? 'bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200' : 'bg-amber-600 hover:bg-amber-700'}
-          `}
-          onClick={handleSubmit}
+    <div className="hidden md:flex flex-1 justify-center px-8 z-50">
+      
+      {/* Layout Anchor (Keeps navbar height stable) */}
+      <div className="relative w-full max-w-2xl h-12">
+        
+        {/* --- Visual Search Card --- */}
+        <div 
+            className={`
+              absolute top-0 left-0 w-full flex flex-col bg-white border shadow-sm transition-all duration-300 ease-out origin-top overflow-hidden
+              rounded-[24px]
+              ${isAi 
+                 ? 'h-40 border-indigo-300 shadow-xl ring-4 ring-indigo-50/50' 
+                 : 'h-12 border-gray-200 hover:shadow-md'
+              }
+            `}
         >
-          {isAiMode ? 'Ask AI' : 'Search'}
-        </button>
+            <div className="flex w-full h-full">
+                
+                {/* 1. Input Area */}
+                <div className={`flex-1 flex flex-col justify-center px-5 py-2 transition-all duration-300 ${isAi ? 'w-full' : ''}`}>
+                    
+                    {/* Standard Input */}
+                    <input
+                      type="text"
+                      placeholder="Where to?"
+                      className={`
+                        w-full bg-transparent outline-none text-gray-900 placeholder:text-gray-500 truncate
+                        ${isAi ? 'hidden' : 'block'}
+                      `}
+                      value={destination}
+                      onChange={(e) => setDestination(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+
+                    {/* AI Textarea */}
+                    {isAi && (
+                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 w-full h-full flex flex-col pt-1">
+                             <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1">
+                                AI Travel Assistant
+                             </span>
+                            <textarea
+                                ref={textareaRef}
+                                placeholder="Describe your trip (e.g. 'A 3 bedroom apartment in New York, near to the gym, near to the Chinese restaurants and has smoke detector...')"
+                                className="w-full h-full bg-transparent outline-none text-indigo-950 placeholder:text-indigo-300/70 text-base resize-none font-medium leading-relaxed custom-scrollbar"
+                                value={destination}
+                                onChange={(e) => setDestination(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* 2. Divider & Dates (Standard Only) */}
+                <div 
+                    className={`
+                        flex items-center overflow-hidden transition-all duration-300 ease-in-out
+                        ${isAi ? 'max-w-0 opacity-0' : 'max-w-[300px] opacity-100 border-l border-gray-200'}
+                    `}
+                >
+                    <div className="flex items-center gap-1 px-2">
+                        {/* Check In */}
+                        <div className="flex flex-col justify-center px-3 py-1 hover:bg-gray-100 rounded-full cursor-pointer group relative">
+                            <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Check In</label>
+                            <div className="text-xs font-semibold text-gray-700 whitespace-nowrap min-w-[60px]">
+                                {startDate || "Add date"}
+                            </div>
+                            <input 
+                               type="date" 
+                               className="absolute inset-0 opacity-0 cursor-pointer"
+                               onChange={(e) => setStartDate(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Check Out */}
+                        <div className="flex flex-col justify-center px-3 py-1 hover:bg-gray-100 rounded-full cursor-pointer group relative">
+                            <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Check Out</label>
+                            <div className="text-xs font-semibold text-gray-700 whitespace-nowrap min-w-[60px]">
+                                {endDate || "Add date"}
+                            </div>
+                            <input 
+                               type="date" 
+                               className="absolute inset-0 opacity-0 cursor-pointer"
+                               onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Search Button */}
+                <div className={`pr-1 flex transition-all duration-300 ${isAi ? 'items-end pb-3' : 'items-center'}`}>
+                    <button
+                        className={`
+                            flex items-center justify-center rounded-full text-white transition-all duration-300 shadow-sm
+                            ${isAi 
+                                ? 'w-10 h-10 bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200' 
+                                : 'w-10 h-10 bg-amber-600 hover:bg-amber-700'
+                            }
+                        `}
+                        onClick={handleSubmit}
+                    >
+                        {isAi ? <ArrowUp size={20} /> : <Search size={18} />}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {/* --- Toggle Button --- */}
+        <div className="absolute -right-14 top-1">
+             <button
+                onClick={() => setMode(isAi ? 'standard' : 'ai')}
+                className={`
+                    flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300
+                    ${isAi 
+                        ? 'bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200' 
+                        : 'bg-white border-indigo-100 text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 shadow-sm'
+                    }
+                `}
+                title={isAi ? "Close AI Search" : "Try AI Search"}
+            >
+                {isAi ? <X size={18} /> : <Sparkles size={18} />}
+            </button>
+        </div>
+        
       </div>
     </div>
   );
