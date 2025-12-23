@@ -27,6 +27,14 @@ const MOCK_REVIEWS = [
     rating: 4,
     avatar: "https://i.pravatar.cc/150?u=2",
     comment: "Great location in Beşiktaş, very close to the ferry."
+  },
+  {
+    id: 3,
+    user: "Sarah Jenkins",
+    date: "Oct 2024",
+    rating: 5,
+    avatar: "https://i.pravatar.cc/150?u=1",
+    comment: "The view of the Bosphorus is breathtaking. Totally worth it."
   }
 ];
 
@@ -59,6 +67,7 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
   const [guestCount, setGuestCount] = useState(1);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [visibleReviews, setVisibleReviews] = useState(2);
 
   /* Effects */
   useEffect(() => {
@@ -275,20 +284,37 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
             {/* Reviews */}
             <div>
               <h3 className="text-xl font-bold mb-6">Recent Reviews</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {MOCK_REVIEWS.map(r => (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {MOCK_REVIEWS.slice(0, visibleReviews).map(r => (
                   <div key={r.id} className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm">
-                    <div className="flex items-center gap-3 mb-3">
-                      <img src={r.avatar} alt={r.user} className="w-8 h-8 rounded-full" />
-                      <div>
-                        <p className="font-bold text-sm">{r.user}</p>
-                        <p className="text-xs text-gray-400">{r.date}</p>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-3">
+                        <img src={r.avatar} alt={r.user} className="w-8 h-8 rounded-full" />
+                        <div>
+                          <p className="font-bold text-sm">{r.user}</p>
+                          <p className="text-xs text-gray-400">{r.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex text-orange-500 gap-0.5">
+                        {[...Array(r.rating)].map((_, i) => (
+                          <Star key={i} size={14} className="fill-current" />
+                        ))}
                       </div>
                     </div>
                     <p className="text-gray-600 text-sm leading-relaxed">"{r.comment}"</p>
                   </div>
                 ))}
               </div>
+
+              {visibleReviews < MOCK_REVIEWS.length && (
+                <Button
+                  variant="outline"
+                  className="w-full md:w-auto"
+                  onClick={() => setVisibleReviews(prev => prev + 10)}
+                >
+                  Show more reviews
+                </Button>
+              )}
             </div>
           </div>
 
