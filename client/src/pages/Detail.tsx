@@ -245,14 +245,14 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
               </div>
 
               {/* Nearby Section */}
-              {hotel.nearby && Object.values(hotel.nearby).some(val => val && val.length > 0) && (
+              {hotel.nearby && Object.values(hotel.nearby).some(val => Array.isArray(val) && val.length > 0) && (
                 <>
                   <hr className="my-8 border-gray-200" />
                   <h3 className="text-lg font-bold mb-6">What's Nearby</h3>
                   <div className="space-y-6">
                     {(Object.entries(NEARBY_CONFIG) as [keyof typeof NEARBY_CONFIG, typeof NEARBY_CONFIG[keyof typeof NEARBY_CONFIG]][]).map(([key, config]) => {
                       const places = hotel.nearby?.[key];
-                      if (!places || places.length === 0) return null;
+                      if (!places || !Array.isArray(places) || places.length === 0) return null;
                       const Icon = config.icon;
 
                       return (
