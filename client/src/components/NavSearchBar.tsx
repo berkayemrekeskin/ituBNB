@@ -109,32 +109,7 @@ export const NavSearchBar: React.FC<NavSearchBarProps> = ({
               )}
             </div>
 
-            {/* 2. Divider & Dates (Standard Only) */}
-            <div
-              className={`
-                        flex items-center overflow-hidden transition-all duration-300 ease-in-out
-                        ${isAi ? 'max-w-0 opacity-0' : 'max-w-[300px] opacity-100 border-l border-gray-200'}
-                    `}
-            >
-              <div className="flex items-center gap-1 px-2">
-                {/* Date Range Logic */}
-                <div
-                  className="flex flex-col justify-center px-4 py-2 hover:bg-gray-100 rounded-full cursor-pointer group relative min-w-[140px]"
-                  onClick={() => setShowDatePicker(true)}
-                >
-                  <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Date</label>
-                  <div className={`text-xs font-semibold whitespace-nowrap ${startDate ? 'text-gray-900' : 'text-gray-400'}`}>
-                    {startDate
-                      ? (endDate
-                        ? `${new Date(startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${new Date(endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
-                        : `${new Date(startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - Add date`
-                      )
-                      : "Add dates"
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
+
 
             {/* 3. Search Button */}
             <div className={`pr-1 flex transition-all duration-300 ${isAi ? 'items-end pb-3' : 'items-center'}`}>

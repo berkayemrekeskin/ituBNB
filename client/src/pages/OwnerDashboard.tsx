@@ -15,7 +15,6 @@ interface OwnerDashboardProps {
 interface Reservation {
   _id: { $oid: string } | string;
   user_id: { $oid: string } | string;
-  host_id: { $oid: string } | string;
   listing_id: { $oid: string } | string;
   start_date: string;
   end_date: string;
@@ -55,36 +54,36 @@ export const OwnerDashboard: React.FC<OwnerDashboardProps> = ({ onCreate, onEdit
         return;
       }
 
-      // Fetch all reservations for this host
-      const reservationsData: Reservation[] = await reservationService.getHostReservations(user.id);
-      setReservations(reservationsData);
+      // Step 1: Fetch host's own listings first
+      const hostListings = await listingService.getHostListings(user.id);
+      setListings(hostListings);
 
-      // Fetch listing details for each reservation
-      const listingIds: string[] = [...new Set(reservationsData.map((r: Reservation) => extractId(r.listing_id)))];
+      // Step 2: Get all listing IDs
+      const hostListingIds = hostListings.map((listing: Hotel) => {
+        const id: any = listing.id;
+        return typeof id === 'string' ? id : id?.$oid || String(id);
+      });
+
+      // Step 3: Fetch all reservations and filter for this host's listings
+      const allReservations = await reservationService.getUserReservations(user.id);
+
+      // Filter reservations that belong to this host's listings
+      const hostReservations = allReservations.filter((reservation: any) => {
+        const listingId = extractId(reservation.listing_id);
+        return hostListingIds.includes(listingId);
+      });
+
+      setReservations(hostReservations);
+
+      // Step 4: Create listings map for quick lookup
       const listingsMapTemp: { [key: string]: Hotel } = {};
-
-      await Promise.all(
-        listingIds.map(async (listingId: string) => {
-          try {
-            const listing = await listingService.getListingById(listingId);
-            listingsMapTemp[listingId] = listing;
-          } catch (err) {
-            console.error(`Failed to fetch listing ${listingId}:`, err);
-          }
-        })
-      );
-
+      hostListings.forEach((listing: Hotel) => {
+        const id: any = listing.id;
+        const listingId = typeof id === 'string' ? id : id?.$oid || String(id);
+        listingsMapTemp[listingId] = listing;
+      });
       setListingsMap(listingsMapTemp);
 
-      // Fetch host's own listings
-      try {
-        const hostListings = await listingService.getHostListings(user.id);
-        setListings(hostListings);
-      } catch (err) {
-        console.error('Failed to fetch host listings:', err);
-        // If fetching host listings fails, fall back to listings from reservations
-        setListings(Object.values(listingsMapTemp));
-      }
     } catch (err: any) {
       console.error('Failed to fetch host data:', err);
       setError(err.response?.data?.error || 'Failed to load dashboard data');
