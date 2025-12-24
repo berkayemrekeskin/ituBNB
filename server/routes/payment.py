@@ -40,6 +40,7 @@ def process_payment():
     db = get_db()
     data = request.json
     current_user = get_jwt_identity()
+    print(data)
 
     
     # Validate basic data structure
@@ -99,8 +100,10 @@ def process_payment():
     
     # Create payment record
     payment_data = {
-        'user_id': str(user['_id']),
-        'reservation_id': str(reservation_id),
+        'user_id': user['_id'],
+        'host_id': reservation['host_id'],
+        'listing_id': reservation['listing_id'],
+        'reservation_id': reservation_id,
         'card_holder_hash': card_holder_hash,
         'card_last_four': card_last_four,
         'amount': data['amount'],

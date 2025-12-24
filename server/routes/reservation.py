@@ -151,12 +151,18 @@ def create_reservation():
     # Validate data
     validation = check_validation(data, reservations_validations)
     date_validation = check_reservation_dates(data)
+
+    listing = db.listings.find_one({'_id': to_object_id(data['listing_id'])})
     
+    host_id = listing['host_id']
+    data['host_id'] = host_id
+    user_id = data['user_id']
+    data['user_id'] = user_id
+
     if not validation:
         return jsonify({'error': 'Invalid data'}), 400
     if not date_validation:
         return jsonify({'error': 'Invalid reservation dates'}), 400
-
 
     # Convert string IDs to ObjectIds for consistency
     if 'user_id' in data:
