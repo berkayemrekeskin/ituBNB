@@ -65,7 +65,7 @@ export const OwnerDashboard: React.FC<OwnerDashboardProps> = ({ onCreate, onEdit
       });
 
       // Step 3: Fetch all reservations and filter for this host's listings
-      const allReservations = await reservationService.getUserReservations(user.id);
+      const allReservations = await reservationService.getHostReservations(user.id);
 
       // Filter reservations that belong to this host's listings
       const hostReservations = allReservations.filter((reservation: any) => {
