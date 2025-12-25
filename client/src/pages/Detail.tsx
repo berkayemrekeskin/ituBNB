@@ -36,8 +36,11 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
   const [error, setError] = useState<string | null>(null);
 
   /* State */
-  const [checkIn, setCheckIn] = useState("2025-11-24");
-  const [checkOut, setCheckOut] = useState("2025-11-29");
+  const [checkIn, setCheckIn] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
+  const [checkOut, setCheckOut] = useState("");
   const [guestCount, setGuestCount] = useState(1);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -187,7 +190,7 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
   }
 
   const nights = getDaysDifference(checkIn, checkOut);
-  const total = hotel.price * nights;
+  const total = hotel.price * nights * guestCount;
 
   if (showAllPhotos) {
     return (
@@ -295,6 +298,13 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
                       setReviewText(e.target.value);
                     }
                   }}
+                  onKeyUp={(e) => {
+                    // Submit on Ctrl+Enter or Cmd+Enter
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && rating > 0 && reviewText.trim().length > 0 && !submittingReview) {
+                      // Trigger the submit button click
+                      document.querySelector<HTMLButtonElement>('[data-review-submit]')?.click();
+                    }
+                  }}
                   placeholder="Tell us about your stay... What did you love? What could be improved?"
                   className="w-full h-32 p-4 border border-gray-200 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                   maxLength={500}
@@ -317,6 +327,7 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
                   Cancel
                 </Button>
                 <Button
+                  data-review-submit
                   className="flex-1 py-3 text-base font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-lg shadow-amber-200 transition-all active:scale-[0.98]"
                   onClick={async () => {
                     if (!hotel || !userCompletedReservation) return;
@@ -632,8 +643,8 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
                         <div className="text-sm font-semibold text-gray-900">
                           {checkIn
                             ? (checkOut
-                              ? `${new Date(checkIn).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${new Date(checkOut).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
-                              : `${new Date(checkIn).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - Select checkout`
+                              ? `${new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                              : `${new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - Select checkout`
                             )
                             : "Select dates"
                           }

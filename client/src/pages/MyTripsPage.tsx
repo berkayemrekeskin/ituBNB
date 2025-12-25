@@ -414,7 +414,10 @@ export const MyTripsPage: React.FC<MyTripsPageProps> = ({ onTripClick }) => {
                         : `You haven't ${activeTab === 'past' ? 'completed' : activeTab} any trips yet.`}
                 </p>
                 {activeTab === 'upcoming' && (
-                  <Button className="bg-amber-600 hover:bg-amber-700 text-white border-none shadow-lg shadow-amber-600/20">
+                  <Button
+                    className="bg-amber-600 hover:bg-amber-700 text-white border-none shadow-lg shadow-amber-600/20"
+                    onClick={() => navigate('/')}
+                  >
                     Start Exploring
                   </Button>
                 )}
