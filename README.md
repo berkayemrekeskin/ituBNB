@@ -358,9 +358,6 @@ npm run lint
 
 This project is licensed under the MIT License.
 
-## 👨‍💻 Authors
-
-- **Berkay Emre Keskin** - [GitHub](https://github.com/berkayemrekeskin)
 
 ## 🙏 Acknowledgments
 
@@ -371,3 +368,4 @@ This project is licensed under the MIT License.
 ---
 
 **Note**: This is a student project developed as part of a software engineering course. For production use, additional security measures and optimizations should be implemented.
+
