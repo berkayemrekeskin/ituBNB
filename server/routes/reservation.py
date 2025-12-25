@@ -231,7 +231,7 @@ def cancel_reservation(reservation_id):
     
     result = db.reservations.update_one(
         {'_id': _id},
-        {'$set': {'status': 'canceled'}}
+        {'$set': {'status': 'cancelled'}}
     )
     
     if result.matched_count:

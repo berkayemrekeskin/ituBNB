@@ -651,9 +651,9 @@ export const TripDetailsPage: React.FC<TripDetailsProps> = ({
                                     <h3 className="text-lg font-bold mb-6">What this place offers</h3>
                                     <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                                         {hotel.amenities && Object.entries(hotel.amenities)
-                                            .filter(([key, value]) => value === true)
-                                            .map(([key], i) => (
-                                                <div key={i} className="flex items-center gap-3 text-gray-700">
+                                            .filter(([, value]) => value === true)
+                                            .map(([key]) => (
+                                                <div key={key} className="flex items-center gap-3 text-gray-700">
                                                     <CheckCircle2 size={18} className="text-amber-600" />
                                                     <span>{key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')}</span>
                                                 </div>
@@ -772,7 +772,23 @@ export const TripDetailsPage: React.FC<TripDetailsProps> = ({
                                 {/* Action Buttons */}
                                 {reservation.status === 'upcoming' && (
                                     <div className="space-y-3">
-                                        <Button variant="outline" className="w-full py-4 text-base font-bold rounded-xl">
+                                        <Button
+                                            variant="outline"
+                                            className="w-full py-4 text-base font-bold rounded-xl text-red-600 border-red-200 hover:bg-red-50"
+                                            onClick={async () => {
+                                                if (window.confirm('Are you sure you want to cancel this reservation? This action cannot be undone.')) {
+                                                    try {
+                                                        await reservationService.cancelReservation(reservation.id);
+                                                        // Update local state to reflect cancellation
+                                                        setReservation({ ...reservation, status: 'canceled' });
+                                                        alert('Reservation canceled successfully. You will receive a full refund.');
+                                                    } catch (error: any) {
+                                                        console.error('Failed to cancel reservation:', error);
+                                                        alert(error.response?.data?.error || 'Failed to cancel reservation. Please try again.');
+                                                    }
+                                                }
+                                            }}
+                                        >
                                             Cancel Reservation
                                         </Button>
                                     </div>

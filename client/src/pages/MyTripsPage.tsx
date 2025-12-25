@@ -22,11 +22,11 @@ interface Reservation {
   end_date: string;
   guests: number;
   total_price: number;
-  status: 'pending' | 'past' | 'declined' | 'upcoming';
+  status: 'pending' | 'past' | 'declined' | 'upcoming' | 'cancelled';
 }
 
 export const MyTripsPage: React.FC<MyTripsPageProps> = ({ onTripClick }) => {
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'declined' | 'pending'>('upcoming');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'declined' | 'pending' | 'cancelled'>('upcoming');
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [listings, setListings] = useState<{ [key: string]: Hotel }>({});
   const [loading, setLoading] = useState(true);
@@ -134,6 +134,8 @@ export const MyTripsPage: React.FC<MyTripsPageProps> = ({ onTripClick }) => {
         return res.status === 'declined';
       } else if (activeTab === 'pending') {
         return res.status === 'pending';
+      } else if (activeTab === 'cancelled') {
+        return res.status === 'cancelled';
       }
       return false;
     });
@@ -158,7 +160,7 @@ export const MyTripsPage: React.FC<MyTripsPageProps> = ({ onTripClick }) => {
 
         {/* Tabs */}
         <div className="flex border-b border-gray-200 mb-8 overflow-x-auto no-scrollbar">
-          {['upcoming', 'past', 'declined', 'pending'].map((tab) => (
+          {['upcoming', 'past', 'cancelled', 'declined', 'pending'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -399,6 +401,7 @@ export const MyTripsPage: React.FC<MyTripsPageProps> = ({ onTripClick }) => {
                   {activeTab === 'past' && <Calendar size={32} className="text-gray-300" />}
                   {activeTab === 'pending' && <AlertCircle size={32} className="text-gray-300" />}
                   {activeTab === 'declined' && <Ban size={32} className="text-gray-300" />}
+                  {activeTab === 'cancelled' && <X size={32} className="text-gray-300" />}
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">No {activeTab} trips</h3>
                 <p className="text-gray-500 max-w-xs mx-auto mb-6">
@@ -406,7 +409,9 @@ export const MyTripsPage: React.FC<MyTripsPageProps> = ({ onTripClick }) => {
                     ? "Time to dust off your bags and start planning your next adventure."
                     : activeTab === 'pending'
                       ? "No pending reservations waiting for host approval."
-                      : `You haven't ${activeTab === 'past' ? 'completed' : activeTab} any trips yet.`}
+                      : activeTab === 'cancelled'
+                        ? "You haven't cancelled any reservations."
+                        : `You haven't ${activeTab === 'past' ? 'completed' : activeTab} any trips yet.`}
                 </p>
                 {activeTab === 'upcoming' && (
                   <Button className="bg-amber-600 hover:bg-amber-700 text-white border-none shadow-lg shadow-amber-600/20">

@@ -24,8 +24,6 @@ SCHEMA (MUST MATCH)
 =====================
 {
   "city": string | null,
-  "starting_date": string | null,
-  "ending_date": string | null,
   "property_type": string | null,
   "amenities": {
     "wifi": boolean | null,
@@ -63,20 +61,14 @@ LOCATION RULES
 =====================
 - Extract only the CITY.
 - Normalize city names:
-  "nyc", "new york city" → "new_york"
+  "nyc", "new york city" → "new york"
 - Use only the FIRST city mentioned.
 - Do NOT guess the country.
 
 =====================
 DATE RULES
 =====================
-- Use ISO-8601 format: YYYY-MM-DD
-- Extract only if explicitly mentioned.
-- Examples:
-  "from june 10 to june 15" → starting_date: 2025-06-10, ending_date: 2025-06-15
-  "next weekend" → ignore (ambiguous)
-- If only one date is mentioned → set the other to null
-- Do NOT infer dates from context.
+Do not extract dates.
 
 =====================
 PROPERTY TYPE RULES
@@ -170,8 +162,6 @@ near subway and restaurants, under $250"
 Return:
 {
   "city": "new_york",
-  "starting_date": "2025-06-10",
-  "ending_date": "2025-06-15",
   "property_type": "apartment",
   "amenities": {
     "wifi": true,

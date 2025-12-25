@@ -25,6 +25,39 @@ from validations import listings_validations, update_listing_validations
 listings_bp = Blueprint("listings", __name__, url_prefix="/api/listings")
 
 
+def transform_listing_for_frontend(listing):
+    """
+    Transform listing data from database format to frontend format.
+    Converts amenities and nearby from arrays to objects with boolean properties.
+    """
+    if not listing:
+        return listing
+    
+    # Define all possible amenities
+    all_amenities = [
+        "wifi", "kitchen", "heating", "air_conditioning", 
+        "washer", "dryer", "free_parking", "pool", "gym", "pet_friendly"
+    ]
+    
+    # Define all possible nearby features
+    all_nearby = [
+        "attractions", "public_transport", "restaurants", 
+        "shopping_centers", "parks"
+    ]
+    
+    # Convert amenities array to object
+    if "amenities" in listing and isinstance(listing["amenities"], list):
+        amenities_obj = {amenity: (amenity in listing["amenities"]) for amenity in all_amenities}
+        listing["amenities"] = amenities_obj
+    
+    # Convert nearby array to object
+    if "nearby" in listing and isinstance(listing["nearby"], list):
+        nearby_obj = {feature: (feature in listing["nearby"]) for feature in all_nearby}
+        listing["nearby"] = nearby_obj
+    
+    return listing
+
+
 # NOTE : Public endpoint - no authentication required for browsing
 @listings_bp.route("/", methods=["GET"])
 def get_listings():
@@ -32,8 +65,12 @@ def get_listings():
     
     # Fetching all listings from the database
     listings = list(db.listings.find({}))
+    
+    # Transform each listing for frontend
+    transformed_listings = [transform_listing_for_frontend(listing) for listing in listings]
+    
     return Response(
-        json_util.dumps(listings),
+        json_util.dumps(transformed_listings),
         mimetype="application/json"
     )
 
@@ -52,8 +89,10 @@ def get_listing_detail(listing_id):
     
     # Returning the listing or error if not found
     if listing:
+        # Transform the listing for frontend
+        transformed_listing = transform_listing_for_frontend(listing)
         return Response(
-            json_util.dumps(listing),
+            json_util.dumps(transformed_listing),
             mimetype="application/json"
         )
     else:
