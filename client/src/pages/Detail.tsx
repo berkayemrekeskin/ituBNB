@@ -690,9 +690,6 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
                       <span className="text-3xl font-bold text-gray-900">₺{hotel.price}</span>
                       <span className="text-gray-500"> / night</span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm font-semibold">
-                      <Star size={16} className="fill-orange-500 text-orange-500" /> {hotel.rating}
-                    </div>
                   </div>
 
                   {/* Date Selection */}
