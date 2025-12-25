@@ -23,7 +23,7 @@ jobs:
             git fetch --all
             git reset --hard origin/main
             cd server
-            echo "GOOGLE_GENAI_API_KEY=${{ secrets.GOOGLE_GENAI_API_KEY }}" >> .env
+            echo "GOOGLE_GENAI_API_KEY=${{ secrets.GOOGLE_GENAI_API_KEY }}" > .env
             source venv/bin/activate
             pip install -r requirements.txt
             sudo systemctl restart itubnb-backend
