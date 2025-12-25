@@ -169,7 +169,7 @@ export const TripDetailsPage: React.FC<TripDetailsProps> = ({
         if (onBookAgain) {
             onBookAgain();
         } else if (hotel) {
-            navigate(`/ hotel / ${hotel.id} `);
+            navigate(`/hotel/${hotel.id}`);
         }
     }
 

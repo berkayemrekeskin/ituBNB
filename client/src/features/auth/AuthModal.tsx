@@ -176,7 +176,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
     }
   };
 
-  const titles = { LOGIN: 'Log in', SIGNUP: 'Sign up', FORGOT: 'Reset Password', SUCCESS: 'Email Sent' };
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !loading) {
+      handleSubmission();
+    }
+  };
+
+  const titles = { LOGIN: 'Log in', SIGNUP: 'Sign up', FORGOT: 'Reset Password', SUCCESS: 'Password Updated' };
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -216,6 +223,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                 <Input
                   label="Name" type="text" placeholder="Full name" value={form.name}
                   onChange={(e: any) => handleChange('name', e.target.value)}
+                  onKeyUp={handleKeyPress}
                   disabled={loading}
                 />
               )}
@@ -223,6 +231,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
               <Input
                 label="Username" placeholder="Enter username" value={form.username}
                 onChange={(e: any) => handleChange('username', e.target.value)}
+                onKeyUp={handleKeyPress}
                 disabled={loading}
               />
 
@@ -230,6 +239,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                 <Input
                   label="Email" type="email" placeholder="your@email.com" value={form.email}
                   onChange={(e: any) => handleChange('email', e.target.value)}
+                  onKeyUp={handleKeyPress}
                   disabled={loading}
                 />
               )}
@@ -244,9 +254,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                   </div>
                   <Input
                     label="Verification Code"
+                    type="text"
                     placeholder="Enter 8-digit code from console"
                     value={inputCode}
-                    onChange={(e: any) => setInputCode(e.target.value)}
+                    onChange={(e: any) => {
+                      // Only allow numbers and limit to 8 characters
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length <= 8) {
+                        setInputCode(value);
+                      }
+                    }}
+                    onKeyUp={handleKeyPress}
+                    maxLength={8}
                     disabled={loading}
                   />
                 </div>
@@ -261,6 +280,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                     placeholder="Enter new password"
                     value={newPassword}
                     onChange={(e: any) => setNewPassword(e.target.value)}
+                    onKeyUp={handleKeyPress}
                     disabled={loading}
                   />
                   <Input
@@ -269,6 +289,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                     placeholder="Confirm new password"
                     value={confirmNewPassword}
                     onChange={(e: any) => setConfirmNewPassword(e.target.value)}
+                    onKeyUp={handleKeyPress}
                     disabled={loading}
                   />
                 </>
@@ -282,6 +303,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                     placeholder="Enter password"
                     value={form.password}
                     onChange={(e: any) => handleChange('password', e.target.value)}
+                    onKeyUp={handleKeyPress}
                     disabled={loading}
                   />
                   <button
@@ -301,6 +323,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
                   placeholder="Confirm password"
                   value={form.confirm}
                   onChange={(e: any) => handleChange('confirm', e.target.value)}
+                  onKeyUp={handleKeyPress}
                   disabled={loading}
                 />
               )}
