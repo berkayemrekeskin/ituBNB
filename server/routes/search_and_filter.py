@@ -21,6 +21,41 @@ from google.genai import types
 
 client = genai.Client(api_key=GOOGLE_GENAI_API_KEY)
 
+
+def transform_listing_for_frontend(listing):
+    """
+    Transform listing data from database format to frontend format.
+    Converts amenities and nearby from arrays to objects with boolean properties.
+    """
+    if not listing:
+        return listing
+    
+    # Define all possible amenities
+    all_amenities = [
+        "wifi", "kitchen", "heating", "air_conditioning", 
+        "washer", "dryer", "free_parking", "pool", "gym", "pet_friendly"
+    ]
+    
+    # Define all possible nearby features
+    all_nearby = [
+        "attractions", "public_transport", "restaurants", 
+        "shopping_centers", "parks"
+    ]
+    
+    # Convert amenities array to object
+    if "amenities" in listing and isinstance(listing["amenities"], list):
+        amenities_obj = {amenity: (amenity in listing["amenities"]) for amenity in all_amenities}
+        listing["amenities"] = amenities_obj
+    
+    # Convert nearby array to object
+    if "nearby" in listing and isinstance(listing["nearby"], list):
+        nearby_obj = {feature: (feature in listing["nearby"]) for feature in all_nearby}
+        listing["nearby"] = nearby_obj
+    
+    return listing
+
+
+
 def extract_filters(user_input: str) -> dict:
     # Use the SYSTEM_PROMPT you defined in the previous message
     response = client.models.generate_content(
@@ -44,7 +79,7 @@ def validate_filters(filters: dict) -> dict:
         raise ValueError("Filters must be an object")
 
     # Match your prompt schema: 'city', 'amenities', 'nearby', 'details', 'price'
-    required_keys = ["city", "amenities", "details", "nearby", "price"]
+    required_keys = ["city", "property_type", "amenities", "nearby", "details", "price"]
     if not all(key in filters for key in required_keys):
         raise ValueError("AI returned an incomplete schema")
 
@@ -53,36 +88,45 @@ def validate_filters(filters: dict) -> dict:
 def build_mongo_query(filters: dict) -> dict:
     query = {}
 
-    # Basic Fields
+    # Filter by city
     if filters.get("city"):
         query["city"] = filters["city"]
 
+    # Filter by property type
     if filters.get("property_type"):
         query["property_type"] = filters["property_type"]
 
-    # Details (Rooms, Guests, etc.)
-    # We use $gte (Greater Than or Equal) so a "3 room" search finds "3 and 4 room" places
+    # Filter by amenities - collect all required amenities into an array
+    # Use $all to ensure the listing has ALL the required amenities
+    amenities = filters.get("amenities", {})
+    required_amenities = [key for key, value in amenities.items() if value is True]
+    if required_amenities:
+        query["amenities"] = {"$all": required_amenities}
+
+    # Filter by nearby features - collect all required features into an array
+    # Use $all to ensure the listing has ALL the required nearby features
+    nearby = filters.get("nearby", {})
+    required_nearby = [key for key, value in nearby.items() if value is True]
+    if required_nearby:
+        query["nearby"] = {"$all": required_nearby}
+
+    # Filter by details (rooms, guests, beds, bathrooms)
+    # Use $gte (greater than or equal) so a search for "3 rooms" finds places with 3 or more rooms
     details = filters.get("details", {})
-    for key in ["rooms", "guests", "bedrooms", "bathrooms"]:
-        if details.get(key) is not None:
-            query[f"details.{key}"] = {"$gte": details[key]}
+    for key, value in details.items():
+        if value is not None and isinstance(value, (int, float)) and value > 0:
+            query[f"details.{key}"] = {"$gte": value}
 
-    # Amenities & Nearby (Dynamic Boolean mapping)
-    for category in ["amenities", "nearby"]:
-        for key, value in filters.get(category, {}).items():
-            if value is True:
-                query[f"{category}.{key}"] = True
-            elif value is False:
-                query[f"{category}.{key}"] = False
-
-    # Price Logic
+    # Filter by price range
     price = filters.get("price", {})
-    if price.get("min_per_night") or price.get("max_per_night"):
-        query["price_per_night"] = {}
-        if price.get("min_per_night"):
-            query["price_per_night"]["$gte"] = price["min_per_night"]
-        if price.get("max_per_night"):
-            query["price_per_night"]["$lte"] = price["max_per_night"]
+    if price and isinstance(price, dict):
+        if price.get("min_per_night") is not None or price.get("max_per_night") is not None:
+            price_query = {}
+            if price.get("min_per_night") is not None:
+                price_query["$gte"] = price["min_per_night"]
+            if price.get("max_per_night") is not None:
+                price_query["$lte"] = price["max_per_night"]
+            query["price"] = price_query
 
     return query
 
@@ -106,35 +150,29 @@ def search_listings_ai():
         # 3. Build Mongo Query
         mongo_query = build_mongo_query(validated_filters)
 
-        # 4. Database execution
-        # Ensure you have your db connection established
-        
+        # 4. Database execution - Use the mongo_query to filter results
         db = get_db()
         listings = list(db.listings.find(mongo_query))
         
-        # Convert ObjectId to string for JSON serialization
-        for listing in listings:
-            if '_id' in listing:
-                listing['_id'] = str(listing['_id'])
+        # Transform listings for frontend
+        transformed_listings = [transform_listing_for_frontend(listing) for listing in listings]
+        
+        # Debug output
+        print("AI Filters:", raw_filters)
+        print("Mongo Query:", mongo_query)
+        print("Results Count:", len(listings))
 
-        return jsonify({
-            "extracted_filters": validated_filters, # Useful for debugging the UI
-            "results_count": len(listings),
-            "listings": listings,
-            "message": "Search executed successfully",
-            "query_used": mongo_query,
-            "response_from_ai": raw_filters
-        })
-
-
-        #return Response(
-        #    json_util.dumps({
-        #        "extracted_filters": validated_filters, # Useful for debugging the UI
-        #        "results_count": len(listings),
-        #        "listings": listings
-        #    }), 
-        #    mimetype='application/json'
-        #)
+        return Response(
+            json_util.dumps({
+                "extracted_filters": validated_filters, # Useful for debugging the UI
+                "results_count": len(transformed_listings),
+                "listings": transformed_listings,
+                "message": "Search executed successfully",
+                "query_used": mongo_query,
+                "response_from_ai": raw_filters
+            }), 
+            mimetype='application/json'
+        )
 
     except Exception as e:
         # Log the error for your own debugging
