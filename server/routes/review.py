@@ -312,6 +312,25 @@ def get_all_reviews():
     
     reviews = list(db.reviews.find({}).sort('created_at', -1))
     
+    # Populate user information for each review
+    for review in reviews:
+        user_id = review.get('user_id')
+        if user_id:
+            try:
+                user_obj_id = ObjectId(user_id) if ObjectId.is_valid(user_id) else None
+                if user_obj_id:
+                    user = db.users.find_one({'_id': user_obj_id})
+                    if user:
+                        review['user'] = {
+                            'name': user.get('name', 'Anonymous'),
+                            'username': user.get('username'),
+                            'email': user.get('email'),
+                            'avatar': user.get('avatar')
+                        }
+            except Exception:
+                # If user_id format is invalid, skip user population
+                pass
+    
     return Response(
         json_util.dumps(reviews),
         mimetype="application/json"
