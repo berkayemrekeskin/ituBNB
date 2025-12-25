@@ -1,6 +1,6 @@
 // src/features/hotels/HotelCard.tsx
 import React from 'react';
-import { Heart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Hotel } from '../../types';
 
 interface HotelCardProps {
@@ -16,9 +16,7 @@ export const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick }) => (
         alt={hotel.title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
-      <button className="absolute top-3 right-3 text-white/70 hover:text-white hover:scale-110 transition-all">
-        <Heart size={24} fill="rgba(0,0,0,0.5)" />
-      </button>
+
       {hotel.superhost && (
         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded shadow-sm text-xs font-bold text-gray-800">
           Superhost
@@ -29,7 +27,7 @@ export const HotelCard: React.FC<HotelCardProps> = ({ hotel, onClick }) => (
       <h3 className="font-semibold text-gray-900 line-clamp-1">{hotel.city}</h3>
       <div className="flex items-center gap-1 text-sm">
         <Star size={14} className="fill-black text-black" />
-        <span>{hotel.rating}</span>
+        <span>{hotel.reviews > 0 && hotel.rating ? hotel.rating.toFixed(2) : 'New'}</span>
       </div>
     </div>
     <p className="text-gray-500 text-sm mb-1">{hotel.property_type}</p>

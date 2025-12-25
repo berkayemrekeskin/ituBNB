@@ -30,7 +30,7 @@ const transformListingToHotel = (listing: any): Hotel => {
     property_type: capitalize(listing.property_type || 'apartment'),
     details: listing.details || {},
     price: listing.price || 0,
-    rating: listing.rating || 4.5,
+    rating: listing.rating || 0,
     reviews: listing.reviews || 0,
     superhost: listing.superhost || false,
     images: listing.images || [],
@@ -136,10 +136,10 @@ export const SearchPage: React.FC<SearchPageProps> = ({ searchTerm, searchMode, 
   ];
 
   const priceOptions = [
-    { label: '$0 - $100', value: '0-100' },
-    { label: '$100 - $200', value: '100-200' },
-    { label: '$200 - $500', value: '200-500' },
-    { label: '$500+', value: '500-999999' },
+    { label: '₺0 - ₺100', value: '0-100' },
+    { label: '₺100 - ₺200', value: '100-200' },
+    { label: '₺200 - ₺500', value: '200-500' },
+    { label: '₺500+', value: '500-999999' },
   ];
 
   const guestOptions = [
