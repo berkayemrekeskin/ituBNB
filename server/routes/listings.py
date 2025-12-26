@@ -67,23 +67,8 @@ def get_listings():
     listings = list(db.listings.find({}))
     
     # Transform each listing for frontend
-    transformed_listings = []
-    for listing in listings:
-        # Calculate reviews stats
-        listing_id = str(listing['_id'])
-        reviews = list(db.reviews.find({'property_id': listing_id}))
-        
-        total_reviews = len(reviews)
-        if total_reviews > 0:
-            total_rating = sum(review.get('rating', 0) for review in reviews)
-            average_rating = round(total_rating / total_reviews, 2)
-        else:
-            average_rating = 0
-            
-        listing['rating'] = average_rating
-        listing['reviews'] = total_reviews
-        
-        transformed_listings.append(transform_listing_for_frontend(listing))
+    # Ratings are now stored in listing documents (average_rating, review_count)
+    transformed_listings = [transform_listing_for_frontend(listing) for listing in listings]
     
     return Response(
         json_util.dumps(transformed_listings),

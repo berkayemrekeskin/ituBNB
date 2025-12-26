@@ -8,7 +8,8 @@ from helpers import (
     check_validation, 
     validate_review_creation,
     to_object_id, 
-    is_admin
+    is_admin,
+    update_listing_rating
 )
 from validations import review_validations
 
@@ -74,6 +75,10 @@ def create_review():
     
     # Insert review
     result = db.reviews.insert_one(review_data)
+    
+    # Update listing's average rating and review count
+    update_listing_rating(db, data.get('property_id'))
+    
     return jsonify({'_id': str(result.inserted_id), 'message': 'Review created successfully'}), 201
 
 @review_bp.route('/<review_id>', methods=['GET'])
@@ -224,6 +229,8 @@ def update_review(review_id):
     )
     
     if result.matched_count:
+        # Update listing's average rating and review count
+        update_listing_rating(db, review.get('property_id'))
         return jsonify({'message': 'Review updated successfully'})
     else:
         return jsonify({'error': 'Review not found'}), 404
@@ -252,9 +259,14 @@ def delete_review(review_id):
     if review.get('user_id') != str(current_user['_id']) and not is_admin(db):
         return jsonify({'error': 'You can only delete your own reviews'}), 403
     
+    # Store property_id before deletion for rating update
+    property_id = review.get('property_id')
+    
     # Delete review
     result = db.reviews.delete_one({'_id': _id})
     if result.deleted_count:
+        # Update listing's average rating and review count
+        update_listing_rating(db, property_id)
         return jsonify({'message': 'Review deleted successfully'})
     else:
         return jsonify({'error': 'Review not found'}), 404
@@ -264,6 +276,7 @@ def get_property_review_stats(property_id):
     """
     Get review statistics for a property (average rating, total count).
     This endpoint is public (no authentication required).
+    Now fetches from listing document instead of calculating.
     """
     db = get_db()
     
@@ -271,10 +284,9 @@ def get_property_review_stats(property_id):
     if not property_id or len(property_id.strip()) == 0:
         return jsonify({'error': 'Invalid property ID'}), 400
     
-    # Fetch all reviews for the property
-    reviews = list(db.reviews.find({'property_id': property_id}))
-    
-    if not reviews:
+    # Try to get listing
+    property_obj_id = to_object_id(property_id)
+    if not property_obj_id:
         return jsonify({
             'property_id': property_id,
             'average_rating': 0,
@@ -282,12 +294,21 @@ def get_property_review_stats(property_id):
             'rating_distribution': {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
         })
     
-    # Calculate statistics
-    total_reviews = len(reviews)
-    total_rating = sum(review.get('rating', 0) for review in reviews)
-    average_rating = round(total_rating / total_reviews, 2)
+    listing = db.listings.find_one({'_id': property_obj_id})
+    if not listing:
+        return jsonify({
+            'property_id': property_id,
+            'average_rating': 0,
+            'total_reviews': 0,
+            'rating_distribution': {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        })
     
-    # Calculate rating distribution
+    # Get stored rating and count from listing
+    average_rating = listing.get('average_rating', 0)
+    total_reviews = listing.get('review_count', 0)
+    
+    # Calculate rating distribution (still need to fetch reviews for this)
+    reviews = list(db.reviews.find({'property_id': property_id}))
     rating_distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
     for review in reviews:
         rating = int(review.get('rating', 0))

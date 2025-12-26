@@ -71,35 +71,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
         loadReservations();
     }, []);
 
-    // Fetch rating stats for all listings
-    useEffect(() => {
-        const fetchRatingsForAllListings = async () => {
-            if (allListings.length > 0) {
-                const ratingsMap = new Map<string, { rating: number; count: number }>();
-
-                await Promise.all(
-                    allListings.map(async (listing) => {
-                        try {
-                            const stats = await reviewService.getPropertyStats(String(listing.id));
-                            if (stats && stats.total_reviews > 0) {
-                                ratingsMap.set(listing.id, {
-                                    rating: stats.average_rating,
-                                    count: stats.total_reviews
-                                });
-                            }
-                        } catch (error) {
-                            // Silently fail for listings without reviews
-                        }
-                    })
-                );
-
-                setAllListingsRatings(ratingsMap);
-            }
-        };
-
-        fetchRatingsForAllListings();
-    }, [allListings]);
-
 
 
     const loadPendingListings = async () => {
@@ -839,23 +810,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onLogout }) => {
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex items-center gap-1">
                                                             <Star size={14} className="text-amber-500 fill-amber-500" />
-                                                            {(() => {
-                                                                const ratingData = allListingsRatings.get(listing.id);
-                                                                if (ratingData) {
-                                                                    return (
-                                                                        <>
-                                                                            <span className="text-sm font-medium text-gray-900">{ratingData.rating.toFixed(1)}</span>
-                                                                            <span className="text-xs text-gray-500">({ratingData.count})</span>
-                                                                        </>
-                                                                    );
-                                                                }
-                                                                return (
-                                                                    <>
-                                                                        <span className="text-sm font-medium text-gray-900">0.0</span>
-                                                                        <span className="text-xs text-gray-500">(0)</span>
-                                                                    </>
-                                                                );
-                                                            })()}
+                                                            <span className="text-sm font-medium text-gray-900">
+                                                                {listing.rating ? listing.rating.toFixed(1) : '0.0'}
+                                                            </span>
+                                                            <span className="text-xs text-gray-500">
+                                                                ({listing.reviews || 0})
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">

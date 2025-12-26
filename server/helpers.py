@@ -169,3 +169,51 @@ def validate_card_number(card_number):
     #     return False, 'Invalid card number'
     
     return True, None
+
+
+# NOTE: Helper function to update listing rating and review count
+def update_listing_rating(db, property_id):
+    """
+    Calculate and update average_rating and review_count for a listing.
+    This should be called whenever a review is created, updated, or deleted.
+    
+    Args:
+        db: Database connection
+        property_id: String ID of the property/listing
+    
+    Returns:
+        (success, error_message) tuple
+    """
+    try:
+        # Validate property_id
+        property_obj_id = to_object_id(property_id)
+        if not property_obj_id:
+            return False, 'Invalid property ID'
+        
+        # Fetch all reviews for this property
+        reviews = list(db.reviews.find({'property_id': property_id}))
+        
+        # Calculate stats
+        review_count = len(reviews)
+        if review_count > 0:
+            total_rating = sum(review.get('rating', 0) for review in reviews)
+            average_rating = round(total_rating / review_count, 2)
+        else:
+            average_rating = 0
+        
+        # Update listing
+        result = db.listings.update_one(
+            {'_id': property_obj_id},
+            {'$set': {
+                'average_rating': average_rating,
+                'review_count': review_count
+            }}
+        )
+        
+        if result.matched_count == 0:
+            return False, 'Listing not found'
+        
+        return True, None
+    
+    except Exception as e:
+        return False, f'Failed to update listing rating: {str(e)}'

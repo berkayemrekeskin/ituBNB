@@ -46,8 +46,11 @@ export const DetailPage: React.FC<DetailPageProps> = ({ hotel: propHotel, onBack
 
   /* State */
   const [checkIn, setCheckIn] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    // Synchronize with GMT+3 (Turkey Time)
+    const now = new Date();
+    // Add 3 hours to current time to match GMT+3
+    const gmt3Date = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+    return gmt3Date.toISOString().split('T')[0];
   });
   const [checkOut, setCheckOut] = useState("");
   const [guestCount, setGuestCount] = useState(1);
