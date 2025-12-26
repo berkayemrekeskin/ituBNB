@@ -6,7 +6,7 @@ from flask_jwt_extended import get_jwt_identity
 from bson import json_util
 from bson.objectid import ObjectId
 from db import get_db
-from helpers import check_validation, to_object_id, is_host
+from helpers import check_validation, to_object_id, is_host, is_admin
 from validations import listings_validations, update_listing_validations
 
 # LISTINGS TABLE
