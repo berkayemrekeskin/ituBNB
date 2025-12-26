@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
+import { Footer } from '../components/Footer';
 import { User } from '../types';
 
 interface MainLayoutProps {
@@ -8,7 +9,7 @@ interface MainLayoutProps {
     onLogin: () => void;
     onLogout: () => void;
     onSearchSubmit: (data: any) => void;
-    onSearchChange?: (value: string) => void; // ✅ Real-time search callback
+    onSearchChange?: (value: string) => void;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({
@@ -16,18 +17,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     onLogin,
     onLogout,
     onSearchSubmit,
-    onSearchChange, // ✅ Destructure callback
+    onSearchChange,
 }) => {
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <Navbar
                 user={user}
                 onLogin={onLogin}
                 onLogout={onLogout}
                 onSearchSubmit={onSearchSubmit}
-                onSearchChange={onSearchChange} // ✅ Pass to Navbar
+                onSearchChange={onSearchChange}
             />
-            <Outlet />
-        </>
+            <main className="flex-1">
+                <Outlet />
+            </main>
+            <Footer />
+        </div>
     );
 };

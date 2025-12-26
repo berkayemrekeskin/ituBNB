@@ -300,7 +300,7 @@ export const MyTripsPage: React.FC<MyTripsPageProps> = ({ onTripClick }) => {
                           <span className="font-bold text-gray-900">₺{reservation.total_price}</span>
                         </div>
 
-                        {(reservation.status === 'upcoming' || reservation.status === 'pending') && (
+                        {reservation.status === 'upcoming' && (
                           <div className="flex gap-3">
                             <Button
                               variant="ghost"

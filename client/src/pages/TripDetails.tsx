@@ -603,11 +603,30 @@ export const TripDetailsPage: React.FC<TripDetailsProps> = ({
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        <Button variant="outline" className="text-sm h-9 px-4 flex items-center gap-2" onClick={handleMessage}>
+                                        <Button
+                                            variant="outline"
+                                            className="text-sm h-9 px-4 flex items-center gap-2"
+                                            onClick={handleMessage}
+                                            disabled={reservation.status === 'pending' || reservation.status === 'declined' || reservation.status === 'past'}
+                                        >
                                             <MessageCircle size={16} />
                                             Message
                                         </Button>
-
+                                        {reservation.status === 'pending' && (
+                                            <p className="text-xs text-gray-500 text-center">
+                                                Available after host approval
+                                            </p>
+                                        )}
+                                        {reservation.status === 'declined' && (
+                                            <p className="text-xs text-gray-500 text-center">
+                                                Not available for declined trips
+                                            </p>
+                                        )}
+                                        {reservation.status === 'past' && (
+                                            <p className="text-xs text-gray-500 text-center">
+                                                Not available for past trips
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 

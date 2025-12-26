@@ -32,7 +32,7 @@ def get_user(user_id):
     if user:
         # Calculate statistics
         trip_count = db.reservations.count_documents({'user_id': _id})
-        review_count = db.reviews.count_documents({'user_id': _id})
+        review_count = db.reviews.count_documents({'user_id': str(_id)})
         
         # Construct response with stats and remove sensitive data
         response = {
@@ -89,8 +89,8 @@ def get_current_user_profile():
     # Count trips (reservations)
     trip_count = db.reservations.count_documents({'user_id': user_id})
     
-    # Count reviews written by user
-    review_count = db.reviews.count_documents({'user_id': user_id})
+    # Count reviews written by user (user_id is stored as string in reviews)
+    review_count = db.reviews.count_documents({'user_id': str(user_id)})
     
     # Count listings if user is a host
     listing_count = 0
